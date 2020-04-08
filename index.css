@@ -1,0 +1,8 @@
+#quote-box {
+  width: 600px;
+  height: 600px;
+  position: relative;
+  border-color: black;
+  margin-left: auto;
+  margin-right: auto;
+}
