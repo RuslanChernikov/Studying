@@ -44,10 +44,11 @@ const tabs = document.querySelectorAll('.tabheader__item'),
     //Timer
 
     const deadline = '2021-01-31';
+
 function getTimeRemaining (endtime) {
     const t= Date.parse(endtime) - Date.parse(new Date()),
     days = Math.floor( t/(1000*60*60*24)),
-    hours = Math.floor((t/(1000*60*60)) %24 ), //Нужен остаток часов от суток
+    hours = Math.floor((t/(1000*60*60)) %24 ), //остаток часов от суток
     minutes = Math.floor((t/1000/60) %60),
     seconds = Math.floor((t/1000)%60);
 
@@ -97,5 +98,64 @@ function setClock (selector, endtime) {
 }
 
 setClock('.timer', deadline);
+
+//Modal window
+
+
+const modal=document.querySelector('.modal'),
+      modalTrigger=document.querySelectorAll('[data-modal]'),
+      modalCloseBtn=document.querySelector('[data-close]');
+
+function showModalWindow() {
+
+    modal.classList.add('show');
+    modal.classList.remove('hide');
+    document.body.style.overflow = 'hidden';
+
+}
+
+function hideModalWindow() {
+    modal.classList.add('hide');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+
+    modalTrigger.forEach((item, i)=> {
+        item.addEventListener('click', ()=> {
+            showModalWindow();
+        });
+        
+    });
+
+
+modalCloseBtn.addEventListener('click', hideModalWindow);
+
+modal.addEventListener('click', (e)=> {
+    if(e.target===modal) {
+        hideModalWindow();
+    }
+
+    document.addEventListener('keydown' , (e)=> {
+        if(e.code==='Escape') {
+            hideModalWindow();
+        }
+    });
+});
+
+setTimeout(showModalWindow, 3000);
+
+function showModalScroll() {
+
+    if(window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+        showModalWindow();
+window.removeEventListener('scroll', showModalScroll);
+    }
+
+}
+
+window.addEventListener('scroll', showModalScroll);
+
+
 
 });
