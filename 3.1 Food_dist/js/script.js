@@ -160,20 +160,26 @@ window.addEventListener('scroll', showModalScroll);
 // Используем классы для карточек
 
 class MenuCard {
-    constructor(src, alt, title, descr, price, parentSelector) {
+    constructor(src, alt, title, descr, price, parentSelector, ...classes) {
         this.src=src;
         this.alt=alt;
         this.title=title;
         this.descr=descr;
         this.price=price;
         this.parent = document.querySelector(parentSelector);
+        this.classes=classes;
 
     }
 
     render(){
         const element=document.createElement('div');
+        if (this.classes.length === 0) {
+            element.classList.add('menu__item');
+        } else {
+            this.classes.forEach(className => element.classList.add(className));
+        }
         element.innerHTML= `
-        <div class="menu__item">
+        
                     <img src=${this.src} alt=${this.alt}>
                     <h3 class="menu__item-subtitle">${this.title}</h3>
                     <div class="menu__item-descr">${this.descr}</div>
@@ -182,7 +188,7 @@ class MenuCard {
                         <div class="menu__item-cost">Цена:</div>
                         <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                     </div>
-                </div>
+                
         `;
 
         this.parent.append(element);
@@ -216,5 +222,48 @@ new MenuCard(
     430,
     '.menu .container'
 ).render();
+
+// Form
+
+const forms = document.querySelectorAll('form');
+
+const message = {
+    loading: 'Загрузка',
+    succsess: 'Спасибо! Мы скоро с Вами свяжемся!',
+    failure: 'Что-то пошло не так'
+};
+
+forms.forEach(items => {
+    postData(items)
+});
+
+function postData(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const statusMessage = document.createElement('div');
+        statusMessage.classList.add('status');    
+        statusMessage.textContent = message.loading;
+            form.append(statusMessage);
+
+        const request = new XMLHttpRequest();
+
+            request.open('POST', 'server.php');
+               // request.setRequestHeader('Content-type', 'multipart/form-data');
+            const formData = new FormData(form);
+
+            request.send(formData);
+
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    statusMessage.textContent=message.succsess;
+                } else {
+                    statusMessage.textContent=message.failure;
+                }
+            });
+    });
+
+}
 
 });
