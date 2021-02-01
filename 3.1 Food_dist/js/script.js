@@ -129,10 +129,9 @@ function hideModalWindow() {
     });
 
 
-modalCloseBtn.addEventListener('click', hideModalWindow);
 
 modal.addEventListener('click', (e)=> {
-    if(e.target===modal) {
+    if(e.target===modal || e.target.getAttribute('data-close') == '') {
         hideModalWindow();
     }
 
@@ -143,7 +142,7 @@ modal.addEventListener('click', (e)=> {
     });
 });
 
-//setTimeout(showModalWindow, 5000);
+setTimeout(showModalWindow, 50000);
 
 function showModalScroll() {
 
@@ -226,44 +225,104 @@ new MenuCard(
 // Form
 
 const forms = document.querySelectorAll('form');
+        let pername=document.querySelectorAll('.input_name');
+        let perphone=document.querySelectorAll('.input_phone');
+let dataObj = {};
+
+
 
 const message = {
-    loading: 'Загрузка',
+    loading: 'img/spinner.svg',
     succsess: 'Спасибо! Мы скоро с Вами свяжемся!',
     failure: 'Что-то пошло не так'
 };
 
 forms.forEach(items => {
-    postData(items)
+    postData(items);
 });
 
 function postData(form) {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const statusMessage = document.createElement('div');
-        statusMessage.classList.add('status');    
-        statusMessage.textContent = message.loading;
-            form.append(statusMessage);
+        pername.forEach((item) => {
+            dataObj.name=item.value;
+        });
+    
+        perphone.forEach((item) => {
+            dataObj.phone=item.value;
+        });
+
+        console.log(dataObj);
+
+        const statusMessage = document.createElement('img');
+        statusMessage.src=message.loading;    
+        statusMessage.style.cssText = `
+            display: block;
+            margin: 0 auto;
+        `;
+            
+            form.insertAdjacentElement('afterend', statusMessage); //вставляет элемент в конце
 
         const request = new XMLHttpRequest();
 
             request.open('POST', 'server.php');
-               // request.setRequestHeader('Content-type', 'multipart/form-data');
-            const formData = new FormData(form);
+            // метод отправки FormData
+               // request.setRequestHeader('Content-type', 'multipart/form-data'); // если отправляем данные в формате
+               // FormData, то заголовок не нужен, он создаётся автоматически. Для JSON заголовок нужен
 
-            request.send(formData);
+            // const formData = new FormData(form);
+
+            // request.send(formData);
+
+
+            // Метод отправки JSON
+
+request.setRequestHeader('Content-type', 'application/json');
+
+const json=JSON.stringify(dataObj);
+        request.send(json);
+
 
             request.addEventListener('load', () => {
                 if (request.status === 200) {
-                    console.log(request.response);
-                    statusMessage.textContent=message.succsess;
+                   console.log(request.response);
+                    showThanksModal(message.succsess);
+                    form.reset();
+                
+                        statusMessage.remove();
+
                 } else {
-                    statusMessage.textContent=message.failure;
+                    showThanksModal(message.failure);
                 }
             });
     });
 
 }
+
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector('.modal__dialog');
+
+        prevModalDialog.classList.add('hide');
+        showModalWindow();
+
+        const thanksModal = document.createElement('div');
+            thanksModal.classList.add('modal__dialog');
+            thanksModal.innerHTML = `
+            <div class="modal__content">
+                <div class="modal__close" data-close>×</div>
+                <div class="modal__title">${message}</div>
+            </div>
+            `;
+
+            document.querySelector('.modal').append(thanksModal);
+
+            setTimeout(() => {
+                thanksModal.remove();
+                prevModalDialog.classList.add('show');
+                prevModalDialog.classList.remove('hide');
+                hideModalWindow();
+            }, 4000);
+    }
 
 });
